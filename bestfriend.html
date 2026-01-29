@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Bestie Valentine 💖</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background: linear-gradient(#ff9a9e,#fad0c4);
+  color:white;
+  text-align:center;
+  overflow-x:hidden;
+}
+.section{display:none;padding:40px;}
+.section.active{display:block;}
+button{
+  padding:12px 25px;
+  border:none;
+  border-radius:25px;
+  background:white;
+  color:#ff4f7a;
+  font-size:16px;
+  margin:10px;
+  cursor:pointer;
+}
+#game1Canvas, #game2Canvas{
+  border:2px solid white;
+  display:block;
+  margin:20px auto;
+  background: #ffc0cb33;
+}
+p.rules{
+  color:yellow;
+  font-weight:bold;
+}
+</style>
+</head>
+<body>
+
+<!-- Welcome / First Page -->
+<div class="section active" id="s1">
+<h1>This is for u Miss Savage (Saaida) 💕</h1>
+
+<button onclick="next(2)">Let's go 🎉</button>
+</div>
+
+<!-- Question 1 -->
+<div class="section" id="s2">
+<h2>Who’s the most awesome friend ever? 😎</h2>
+<button onclick="next(3)">You ❤️</button>
+<button onclick="next(3)">Maybe me 😁</button>
+</div>
+
+<!-- Question 2 -->
+<div class="section" id="s3">
+<h2>Are we gonna have a fun Valentine’s Day? 🎈</h2>
+<button onclick="next(4)">Yes! 🎉</button>
+<button onclick="next(4)">Of course 😄</button>
+</div>
+
+<!-- Game 1: Bow & Arrow -->
+<div class="section" id="s4">
+<h2>🎯 Game 1: Hit the Heart with Arrow</h2>
+<p class="rules">Rules: Click anywhere to shoot arrow and hit the moving heart!</p>
+<canvas id="game1Canvas" width="400" height="300"></canvas>
+<button onclick="next(5)">Skip → Fun Game</button>
+</div>
+
+<!-- Game 2: Fun Fhadu Game -->
+<div class="section" id="s5">
+<h2>💖 Game 2: Catch Falling Hearts</h2>
+<p class="rules">Rules: Click on the hearts. Catch 10 hearts to continue!</p>
+<canvas id="game2Canvas" width="400" height="300"></canvas>
+<button onclick="next(6)">Skip → Valentine Wish</button>
+</div>
+
+<!-- Valentine Wish -->
+<div class="section" id="s6">
+<h1>Happy Valentine’s Day, Bestie! 🌸</h1>
+<p>You make life brighter just by being you! 💖</p>
+<button onclick="next(7)">One last thing ✉️</button>
+</div>
+
+<!-- Friendly Letter -->
+<div class="section" id="s7">
+<h2>My Letter For You 💌</h2>
+<p>
+Hey Bestie! 💕<br>
+I just wanted to say, having you as my friend is amazing.<br>
+Thanks for all the laughs, the crazy moments, and being you!<br>
+Happy Valentine’s Day! 🌹
+</p>
+</div>
+
+<script>
+// Section Navigation
+function next(n){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+}
+
+// ----------------------
+// Game 1: Bow & Arrow Smooth
+// ----------------------
+const canvas1 = document.getElementById('game1Canvas');
+const ctx1 = canvas1.getContext('2d');
+
+let heartX = Math.random() * 300 + 50;
+let heartY = 50;
+let arrowX = 200;
+let arrowY = 280;
+let arrowShot = false;
+let arrowSpeed = 5;
+
+function drawHeart(x,y){
+  ctx1.fillStyle = "red";
+  ctx1.font = "30px Arial";
+  ctx1.fillText("❤️",x,y);
+}
+
+function drawArrow(x,y){
+  ctx1.fillStyle = "brown";
+  ctx1.font = "30px Arial";
+  ctx1.fillText("🏹",x,y);
+}
+
+function game1Loop(){
+  ctx1.clearRect(0,0,400,300);
+  drawHeart(heartX,heartY);
+  drawArrow(arrowX,arrowY);
+  
+  // Smooth heart side movement
+  heartX += Math.sin(Date.now()/500)*1.5;
+
+  // Arrow moves up if shot
+  if(arrowShot){
+    arrowY -= arrowSpeed;
+    if(arrowY < 0){
+      arrowY = 280;
+      arrowShot = false;
+    }
+    // Check collision
+    if(Math.abs(arrowX - heartX)<25 && Math.abs(arrowY - heartY)<25){
+      alert("Nice! 💖 You hit the heart!");
+      arrowY = 280;
+      arrowShot = false;
+      next(5);
+    }
+  }
+  
+  requestAnimationFrame(game1Loop);
+}
+game1Loop();
+
+// Shoot arrow on click
+canvas1.addEventListener('click',()=>{
+  if(!arrowShot){
+    arrowShot = true;
+  }
+});
+
+// ----------------------
+// Game 2: Catch Falling Hearts Slow
+// ----------------------
+const canvas2 = document.getElementById('game2Canvas');
+const ctx2 = canvas2.getContext('2d');
+
+let hearts = [];
+let clicks = 0;
+for(let i=0;i<10;i++){
+  hearts.push({x:Math.random()*380, y:Math.random()*-300-50, speed: Math.random()*0.5+0.3});
+}
+
+function drawHearts(){
+  ctx2.clearRect(0,0,400,300);
+  hearts.forEach(h=>{
+    ctx2.font = "30px Arial";
+    ctx2.fillText("💖",h.x,h.y);
+    h.y += h.speed;
+    if(h.y>300) h.y=-50;
+  });
+  requestAnimationFrame(drawHearts);
+}
+drawHearts();
+
+canvas2.addEventListener('click',(e)=>{
+  const rect = canvas2.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  hearts.forEach(h=>{
+    if(Math.abs(h.x-mx)<20 && Math.abs(h.y-my)<20){
+      clicks++;
+      h.y=-50;
+    }
+  });
+  if(clicks>=10){
+    alert("Wow! You caught enough hearts 💕");
+    next(6);
+  }
+});
+</script>
+
+</body>
+</html>
